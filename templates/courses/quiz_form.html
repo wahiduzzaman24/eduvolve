@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Quiz - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_manage' lesson.course.id %}">{{ lesson.course.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:lesson_edit' lesson.id %}">{{ lesson.title }}</a></li>
+                    <li class="breadcrumb-item active">{{ action }} Quiz</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold">
+                <i class="bi bi-puzzle"></i> {{ action }} Quiz
+            </h1>
+            <p class="text-muted">For lesson: {{ lesson.title }}</p>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">Quiz Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="text-muted">Optional instructions for students</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.passing_score.id_for_label }}" class="form-label fw-bold">Passing Score (%)</label>
+                                {{ form.passing_score }}
+                                {% if form.passing_score.errors %}
+                                <div class="text-danger small mt-1">{{ form.passing_score.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Minimum score to pass (0-100)</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.time_limit_minutes.id_for_label }}" class="form-label fw-bold">Time Limit (minutes)</label>
+                                {{ form.time_limit_minutes }}
+                                {% if form.time_limit_minutes.errors %}
+                                <div class="text-danger small mt-1">{{ form.time_limit_minutes.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> {{ action }} Quiz
+                            </button>
+                            <a href="{% url 'courses:lesson_edit' lesson.id %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if quiz %}
+            <div class="card shadow mt-4">
+                <div class="card-body">
+                    <h5><i class="bi bi-info-circle"></i> Next Steps</h5>
+                    <p>After saving the quiz details, you can add questions to make it complete.</p>
+                    <a href="{% url 'courses:quiz_manage' quiz.id %}" class="btn btn-success">
+                        <i class="bi bi-list-task"></i> Manage Questions
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

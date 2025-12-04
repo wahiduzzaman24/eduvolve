@@ -1,0 +1,12 @@
+A = int(input("Enter value for A: "))
+B = int(input("Enter value for B: "))
+
+if A % 2 == 0:
+    print("A is Even")
+else:
+    print("B is Odd")
+
+if B % 2 == 0:
+    print("B is Even")
+else:
+    print("B is Odd")

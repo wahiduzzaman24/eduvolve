@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }} Question - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:quiz_manage' quiz.id %}">{{ quiz.title }}</a></li>
+                    <li class="breadcrumb-item active">{{ action }} Question</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold">
+                <i class="bi bi-question-circle"></i> {{ action }} Question
+            </h1>
+            <p class="text-muted">For quiz: {{ quiz.title }}</p>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.question_text.id_for_label }}" class="form-label fw-bold">Question Text</label>
+                            {{ form.question_text }}
+                            {% if form.question_text.errors %}
+                            <div class="text-danger small mt-1">{{ form.question_text.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.question_type.id_for_label }}" class="form-label fw-bold">Question Type</label>
+                                {{ form.question_type }}
+                                {% if form.question_type.errors %}
+                                <div class="text-danger small mt-1">{{ form.question_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.points.id_for_label }}" class="form-label fw-bold">Points</label>
+                                {{ form.points }}
+                                {% if form.points.errors %}
+                                <div class="text-danger small mt-1">{{ form.points.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.order.id_for_label }}" class="form-label fw-bold">Order</label>
+                                {{ form.order }}
+                                {% if form.order.errors %}
+                                <div class="text-danger small mt-1">{{ form.order.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h5 class="mb-3"><i class="bi bi-list-check"></i> Answer Options</h5>
+                        <p class="text-muted small">Mark the correct answer(s) with the checkbox</p>
+                        
+                        {{ formset.management_form }}
+                        
+                        <div id="answer-formset">
+                            {% for form in formset %}
+                            <div class="answer-form card mb-3 p-3 bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col-md-7">
+                                        <label class="form-label fw-bold small">Answer Text</label>
+                                        {{ form.answer_text }}
+                                        {% if form.answer_text.errors %}
+                                        <div class="text-danger small">{{ form.answer_text.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold small">Order</label>
+                                        {{ form.order }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-check">
+                                            {{ form.is_correct }}
+                                            <label class="form-check-label" for="{{ form.is_correct.id_for_label }}">
+                                                Correct
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        {% if form.instance.pk %}
+                                        <div class="form-check">
+                                            {{ form.DELETE }}
+                                            <label class="form-check-label text-danger" for="{{ form.DELETE.id_for_label }}">
+                                                <small>Delete</small>
+                                            </label>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {{ form.id }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle"></i> <strong>Tip:</strong> Multiple choice questions require at least 2 options. Make sure to mark at least one correct answer!
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Save Question
+                            </button>
+                            <a href="{% url 'courses:quiz_manage' quiz.id %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
