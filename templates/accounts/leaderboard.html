@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <i class="bi bi-trophy display-1 text-warning"></i>
+        <h1 class="display-4 fw-bold mt-3">Leaderboard</h1>
+        <p class="lead text-muted">Top learners on EduVolve</p>
+    </div>
+    
+    {% if user_rank %}
+    <div class="alert alert-info text-center mb-4">
+        <h5 class="mb-0">
+            <i class="bi bi-star-fill"></i> Your Current Rank: #{{ user_rank }}
+            ({{ user.total_points }} points)
+        </h5>
+    </div>
+    {% endif %}
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="10%">Rank</th>
+                            <th>Student</th>
+                            <th width="15%">Points</th>
+                            <th width="15%">Streak</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in top_students %}
+                        <tr {% if student == user %}class="table-primary"{% endif %}>
+                            <td class="fw-bold">
+                                {% if forloop.counter <= 3 %}
+                                    <i class="bi bi-trophy-fill text-warning"></i>
+                                {% endif %}
+                                #{{ forloop.counter }}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle fs-3 me-2"></i>
+                                    <div>
+                                        <div class="fw-bold">{{ student.get_full_name|default:student.username }}</div>
+                                        <small class="text-muted">@{{ student.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-star-fill"></i> {{ student.total_points }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-fire"></i> {{ student.current_streak }} days
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No students yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

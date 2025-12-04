@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Result - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header {% if attempt.is_passed %}bg-success{% else %}bg-danger{% endif %} text-white text-center">
+                    <h3 class="mb-0">
+                        {% if attempt.is_passed %}
+                            <i class="bi bi-check-circle-fill"></i> Congratulations!
+                        {% else %}
+                            <i class="bi bi-x-circle-fill"></i> Keep Trying!
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-1 mb-4">{{ attempt.score|floatformat:1 }}%</h1>
+                    
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Points Earned</h6>
+                                    <h3>{{ attempt.points_earned }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Passing Score</h6>
+                                    <h3>{{ quiz.passing_score }}%</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if attempt.is_passed %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-trophy-fill"></i> You passed the quiz! Great job!
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-info-circle"></i> You need {{ quiz.passing_score }}% to pass. Keep learning!
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'courses:lesson_view' quiz.lesson.id %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> Back to Lesson
+                        </a>
+                        {% if not attempt.is_passed %}
+                        <a href="{% url 'courses:quiz_take' quiz.id %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Try Again
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

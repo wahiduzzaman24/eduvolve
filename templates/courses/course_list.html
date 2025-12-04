@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Courses - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-book"></i> Browse Courses
+            </h1>
+            <p class="lead text-muted">Discover your next learning adventure</p>
+        </div>
+        <div class="col-md-4">
+            <form method="get" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search courses..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                <a href="?level=" class="btn {% if not level %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    All Levels
+                </a>
+                <a href="?level=BEGINNER" class="btn {% if level == 'BEGINNER' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    Beginner
+                </a>
+                <a href="?level=INTERMEDIATE" class="btn {% if level == 'INTERMEDIATE' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    Intermediate
+                </a>
+                <a href="?level=ADVANCED" class="btn {% if level == 'ADVANCED' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    Advanced
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Grid -->
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                {% if course.thumbnail %}
+                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="bg-gradient text-white p-5 text-center" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); height: 200px;">
+                    <i class="bi bi-book display-1"></i>
+                </div>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text text-muted flex-grow-1">
+                        {{ course.description|truncatewords:20 }}
+                    </p>
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ course.get_level_display }}</span>
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-clock"></i> {{ course.duration_weeks }} weeks
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> {{ course.instructor.get_full_name|default:course.instructor.username }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="bi bi-people"></i> {{ course.get_enrolled_count }} students
+                        </small>
+                    </div>
+                    <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-primary w-100">
+                        View Course
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <p class="lead text-muted mt-3">No courses found</p>
+                {% if search_query %}
+                <p class="text-muted">Try a different search term</p>
+                <a href="{% url 'courses:course_list' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Show All Courses
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

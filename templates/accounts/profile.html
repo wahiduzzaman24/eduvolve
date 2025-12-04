@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="rounded-circle mb-3" width="150" height="150" style="object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle display-1 text-primary"></i>
+                    {% endif %}
+                    <h3 class="mb-1">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted mb-3">
+                        <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                    </p>
+                    <a href="{% url 'accounts:edit_profile' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+            
+            {% if user.is_student %}
+            <div class="card shadow mt-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="bi bi-star-fill text-warning"></i> Total Points</span>
+                            <strong>{{ user.total_points }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="bi bi-fire text-danger"></i> Current Streak</span>
+                            <strong>{{ user.current_streak }} days</strong>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="bi bi-trophy text-success"></i> Longest Streak</span>
+                            <strong>{{ user.longest_streak }} days</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th width="30%">Username:</th>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Full Name:</th>
+                            <td>{{ user.get_full_name|default:"Not provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ user.phone|default:"Not provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date of Birth:</th>
+                            <td>{{ user.date_of_birth|date:"F d, Y"|default:"Not provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Member Since:</th>
+                            <td>{{ user.date_joined|date:"F d, Y" }}</td>
+                        </tr>
+                    </table>
+                    
+                    {% if user.bio %}
+                    <div class="mt-4">
+                        <h6 class="fw-bold">Bio:</h6>
+                        <p>{{ user.bio }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if user.is_student and user_badges %}
+            <div class="card shadow mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-award"></i> Earned Badges</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for user_badge in user_badges %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-{{ user_badge.badge.icon }} display-4 text-{{ user_badge.badge.color }}"></i>
+                                    <h6 class="mt-2">{{ user_badge.badge.name }}</h6>
+                                    <small class="text-muted">{{ user_badge.badge.description }}</small>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Earned: {{ user_badge.earned_at|date:"M d, Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

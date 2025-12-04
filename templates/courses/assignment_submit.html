@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Submit Assignment - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'courses:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' assignment.lesson.course.id %}">{{ assignment.lesson.course.title }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'courses:lesson_view' assignment.lesson.id %}">{{ assignment.lesson.title }}</a></li>
+            <li class="breadcrumb-item active">Submit Assignment</li>
+        </ol>
+    </nav>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="bi bi-file-earmark-text"></i> {{ assignment.title }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-calendar"></i> Due Date:</strong><br>
+                                {{ assignment.due_date|date:"F d, Y h:i A" }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-star"></i> Max Points:</strong><br>
+                                {{ assignment.max_points }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5>Assignment Description</h5>
+                    <p>{{ assignment.description|linebreaks }}</p>
+                    
+                    {% if assignment.attachment %}
+                    <div class="mb-4">
+                        <h6><i class="bi bi-paperclip"></i> Assignment Materials</h6>
+                        <a href="{{ assignment.attachment.url }}" class="btn btn-outline-primary" download>
+                            <i class="bi bi-download"></i> Download Assignment File
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if existing_submission %}
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-info-circle"></i> Previous Submission</h6>
+                        <p class="mb-1">You submitted this assignment on {{ existing_submission.submitted_at|date:"F d, Y h:i A" }}</p>
+                        <p class="mb-1"><strong>Status:</strong> {{ existing_submission.get_status_display }}</p>
+                        {% if existing_submission.grade %}
+                        <p class="mb-0"><strong>Grade:</strong> {{ existing_submission.grade }}/100</p>
+                        {% endif %}
+                        {% if existing_submission.feedback %}
+                        <hr>
+                        <p class="mb-0"><strong>Feedback:</strong> {{ existing_submission.feedback }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <hr class="my-4">
+                    
+                    <h5>{% if existing_submission %}Resubmit Assignment{% else %}Submit Your Work{% endif %}</h5>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-upload"></i> Submit Assignment
+                            </button>
+                            <a href="{% url 'courses:lesson_view' assignment.lesson.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Lesson
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

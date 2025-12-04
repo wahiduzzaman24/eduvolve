@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="display-5 fw-bold mb-4">
+        <i class="bi bi-shield-check"></i> Admin Dashboard
+    </h1>
+    
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h6>Total Users</h6>
+                    <h2>{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h6>Total Courses</h6>
+                    <h2>{{ total_courses }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <h6>Students</h6>
+                    <h2>{{ total_students }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow">
+                <div class="card-body">
+                    <h6>Instructors</h6>
+                    <h2>{{ total_instructors }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Courses</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for course in recent_courses %}
+                    <a href="{% url 'courses:course_detail' course.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ course.title }}</strong>
+                            <small class="text-muted">{{ course.created_at|date:"M d" }}</small>
+                        </div>
+                        <small class="text-muted">by {{ course.instructor.username }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Users</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for user in recent_users %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>{{ user.username }}</strong>
+                                <span class="badge bg-{{ user.role|lower }}">{{ user.get_role_display }}</span>
+                            </div>
+                            <small class="text-muted">{{ user.date_joined|date:"M d" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

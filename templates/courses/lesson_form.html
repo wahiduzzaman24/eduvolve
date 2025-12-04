@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if lesson %}Edit{% else %}Create{% endif %} Lesson - EduVolve{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'courses:dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'courses:course_manage' course.id %}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item active">{% if lesson %}Edit{% else %}Create{% endif %} Lesson</li>
+        </ol>
+    </nav>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-{% if lesson %}pencil{% else %}plus-circle{% endif %}"></i>
+                        {% if lesson %}Edit Lesson{% else %}Create New Lesson{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="alert alert-info">
+                            <strong><i class="bi bi-info-circle"></i> Video URL Tips:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Use YouTube video URLs (e.g., https://www.youtube.com/watch?v=VIDEO_ID)</li>
+                                <li>The video will be automatically embedded in the lesson</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> {% if lesson %}Update{% else %}Create{% endif %} Lesson
+                            </button>
+                            <a href="{% url 'courses:course_manage' course.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
