@@ -44,7 +44,7 @@
                 </div>
             </div>
             <div class="mt-3">
-                <a href="#" class="btn btn-outline-primary me-2">
+                <a href="{% url 'courses:course_edit' course.id %}" class="btn btn-outline-primary me-2">
                     <i class="bi bi-pencil"></i> Edit Course
                 </a>
                 <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-outline-secondary" target="_blank">
@@ -58,9 +58,9 @@
     <div class="card shadow">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-play-circle"></i> Course Lessons</h5>
-            <button class="btn btn-success btn-sm">
+            <a href="{% url 'courses:lesson_create' course.id %}" class="btn btn-success btn-sm">
                 <i class="bi bi-plus-circle"></i> Add Lesson
-            </button>
+            </a>
         </div>
         <div class="card-body">
             {% if lessons %}
@@ -90,12 +90,12 @@
                             <span class="badge bg-warning text-dark me-2">Draft</span>
                             {% endif %}
                             <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary">
+                                <a href="{% url 'courses:lesson_edit' lesson.id %}" class="btn btn-outline-primary">
                                     <i class="bi bi-pencil"></i> Edit
-                                </button>
-                                <button class="btn btn-outline-danger">
+                                </a>
+                                <a href="{% url 'courses:lesson_delete' lesson.id %}" class="btn btn-outline-danger">
                                     <i class="bi bi-trash"></i>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -106,9 +106,9 @@
             <div class="text-center py-5">
                 <i class="bi bi-play-circle display-1 text-muted"></i>
                 <p class="lead text-muted mt-3">No lessons added yet</p>
-                <button class="btn btn-success">
+                <a href="{% url 'courses:lesson_create' course.id %}" class="btn btn-success">
                     <i class="bi bi-plus-circle"></i> Add Your First Lesson
-                </button>
+                </a>
             </div>
             {% endif %}
         </div>
