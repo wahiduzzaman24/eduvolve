@@ -11,7 +11,7 @@ from .models import (
 )
 from .forms import (
     CourseForm, LessonForm, QuizForm, QuestionForm, AnswerFormSet,
-    AssignmentForm, AssignmentSubmissionForm
+    AssignmentForm, AssignmentSubmissionForm, AssignmentGradeForm
 )
 
 
@@ -786,3 +786,63 @@ def assignment_delete(request, pk):
         'assignment': assignment,
     }
     return render(request, 'courses/assignment_confirm_delete.html', context)
+
+
+@login_required
+def assignment_submissions(request, pk):
+    """View all submissions for an assignment (Instructor only)"""
+    assignment = get_object_or_404(
+        Assignment, pk=pk, lesson__course__instructor=request.user)
+    submissions = assignment.submissions.all().select_related('student')
+
+    # Get statistics
+    total_submissions = submissions.count()
+    pending_count = submissions.filter(status='PENDING').count()
+    graded_count = submissions.filter(status='GRADED').count()
+
+    context = {
+        'assignment': assignment,
+        'submissions': submissions,
+        'total_submissions': total_submissions,
+        'pending_count': pending_count,
+        'graded_count': graded_count,
+    }
+    return render(request, 'courses/assignment_submissions.html', context)
+
+
+@login_required
+def assignment_grade(request, pk):
+    """Grade an assignment submission (Instructor only)"""
+    submission = get_object_or_404(
+        AssignmentSubmission,
+        pk=pk,
+        assignment__lesson__course__instructor=request.user
+    )
+
+    if request.method == 'POST':
+        form = AssignmentGradeForm(request.POST, instance=submission)
+        if form.is_valid():
+            graded_submission = form.save(commit=False)
+            graded_submission.graded_by = request.user
+            graded_submission.graded_at = timezone.now()
+            graded_submission.save()
+
+            # Award points to student if graded
+            if graded_submission.status == 'GRADED' and graded_submission.grade:
+                points = int((graded_submission.grade / 100) *
+                             submission.assignment.max_points)
+                submission.student.add_points(points)
+
+            messages.success(request, f'Submission graded successfully!')
+            return redirect('courses:assignment_submissions', pk=submission.assignment.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AssignmentGradeForm(instance=submission)
+
+    context = {
+        'form': form,
+        'submission': submission,
+        'assignment': submission.assignment,
+    }
+    return render(request, 'courses/assignment_grade.html', context)

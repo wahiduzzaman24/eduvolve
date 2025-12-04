@@ -54,6 +54,10 @@ urlpatterns = [
          views.assignment_edit, name='assignment_edit'),
     path('assignment/<int:pk>/delete/',
          views.assignment_delete, name='assignment_delete'),
+    path('assignment/<int:pk>/submissions/',
+         views.assignment_submissions, name='assignment_submissions'),
+    path('submission/<int:pk>/grade/',
+         views.assignment_grade, name='assignment_grade'),
 
     # Student - Quiz
     path('quiz/<int:pk>/take/', views.quiz_take, name='quiz_take'),
