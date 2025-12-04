@@ -16,11 +16,16 @@ urlpatterns = [
     path('course/create/', views.course_create, name='course_create'),
     path('course/<int:pk>/edit/', views.course_edit, name='course_edit'),
     path('course/<int:pk>/manage/', views.course_manage, name='course_manage'),
+    path('course//edit/', views.course_edit, name='course_edit'),
+    path('course//delete/', views.course_delete, name='course_delete'),
+    path('course//lesson/create/', views.lesson_create, name='lesson_create'),
     
     # Instructor - Lesson management
     path('course/<int:course_pk>/lesson/create/', views.lesson_create, name='lesson_create'),
     path('lesson/<int:pk>/edit/', views.lesson_edit, name='lesson_edit'),
     path('lesson/<int:pk>/delete/', views.lesson_delete, name='lesson_delete'),
+    path('lesson//edit/', views.lesson_edit, name='lesson_edit'),
+    path('lesson//delete/', views.lesson_delete, name='lesson_delete'),
     
     # Student - Lesson viewing
     path('lesson/<int:pk>/', views.lesson_view, name='lesson_view'),
@@ -32,4 +37,6 @@ urlpatterns = [
     
     # Assignment
     path('assignment/<int:pk>/submit/', views.assignment_submit, name='assignment_submit'),
+
+    
 ]

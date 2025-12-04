@@ -360,7 +360,6 @@ def assignment_submit(request, pk):
     return render(request, 'courses/assignment_submit.html', context)
 
 
-# INSTRUCTOR VIEWS
 
 @login_required
 def course_create(request):
@@ -375,12 +374,18 @@ def course_create(request):
             course = form.save(commit=False)
             course.instructor = request.user
             course.save()
-            messages.success(request, 'Course created successfully!')
+            messages.success(request, f'Course "{course.title}" created successfully!')
             return redirect('courses:course_manage', pk=course.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = CourseForm()
     
-    return render(request, 'courses/course_form.html', {'form': form})
+    context = {
+        'form': form,
+        'action': 'Create',
+    }
+    return render(request, 'courses/course_form.html', context)
 
 
 @login_required
@@ -392,14 +397,17 @@ def course_edit(request, pk):
         form = CourseForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Course updated successfully!')
+            messages.success(request, f'Course "{course.title}" updated successfully!')
             return redirect('courses:course_manage', pk=course.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = CourseForm(instance=course)
     
     context = {
         'form': form,
         'course': course,
+        'action': 'Edit',
     }
     return render(request, 'courses/course_form.html', context)
 
@@ -408,7 +416,7 @@ def course_edit(request, pk):
 def course_manage(request, pk):
     """Manage course content (Instructor only)"""
     course = get_object_or_404(Course, pk=pk, instructor=request.user)
-    lessons = course.lessons.all()
+    lessons = course.lessons.all().order_by('order')
     
     context = {
         'course': course,
@@ -428,8 +436,10 @@ def lesson_create(request, course_pk):
             lesson = form.save(commit=False)
             lesson.course = course
             lesson.save()
-            messages.success(request, 'Lesson created successfully!')
+            messages.success(request, f'Lesson "{lesson.title}" created successfully!')
             return redirect('courses:course_manage', pk=course.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         # Set default order
         last_lesson = course.lessons.order_by('-order').first()
@@ -439,6 +449,7 @@ def lesson_create(request, course_pk):
     context = {
         'form': form,
         'course': course,
+        'action': 'Create',
     }
     return render(request, 'courses/lesson_form.html', context)
 
@@ -452,8 +463,10 @@ def lesson_edit(request, pk):
         form = LessonForm(request.POST, request.FILES, instance=lesson)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Lesson updated successfully!')
+            messages.success(request, f'Lesson "{lesson.title}" updated successfully!')
             return redirect('courses:course_manage', pk=lesson.course.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = LessonForm(instance=lesson)
     
@@ -461,6 +474,7 @@ def lesson_edit(request, pk):
         'form': form,
         'lesson': lesson,
         'course': lesson.course,
+        'action': 'Edit',
     }
     return render(request, 'courses/lesson_form.html', context)
 
@@ -472,11 +486,29 @@ def lesson_delete(request, pk):
     course_id = lesson.course.id
     
     if request.method == 'POST':
+        lesson_title = lesson.title
         lesson.delete()
-        messages.success(request, 'Lesson deleted successfully!')
+        messages.success(request, f'Lesson "{lesson_title}" deleted successfully!')
         return redirect('courses:course_manage', pk=course_id)
     
     context = {
         'lesson': lesson,
     }
     return render(request, 'courses/lesson_confirm_delete.html', context)
+
+
+@login_required
+def course_delete(request, pk):
+    """Delete a course (Instructor only)"""
+    course = get_object_or_404(Course, pk=pk, instructor=request.user)
+    
+    if request.method == 'POST':
+        course_title = course.title
+        course.delete()
+        messages.success(request, f'Course "{course_title}" deleted successfully!')
+        return redirect('courses:dashboard')
+    
+    context = {
+        'course': course,
+    }
+    return render(request, 'courses/course_confirm_delete.html', context)
