@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load course_filters %}
 
 {% block title %}{{ lesson.title }} - EduVolve{% endblock %}
 
@@ -68,12 +69,12 @@
                             </span>
                             {% if lesson.quiz %}
                             <span class="badge bg-warning text-dark me-2">
-                                <i class="bi bi-puzzle"></i> Has Quiz
+                                <i class="bi bi-puzzle"></i> Quiz ({{ lesson.quiz.get_total_points }} pts)
                             </span>
                             {% endif %}
                             {% if lesson.assignments.count %}
                             <span class="badge bg-info">
-                                <i class="bi bi-file-earmark-text"></i> Has Assignment
+                                <i class="bi bi-file-earmark-text"></i> {{ lesson.assignments.count }} Assignment{{ lesson.assignments.count|pluralize }}
                             </span>
                             {% endif %}
                         </div>
@@ -128,22 +129,38 @@
                 <div class="card-body">
                     <p class="lead">{{ lesson.quiz.description }}</p>
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <small class="text-muted d-block">Time Limit</small>
-                            <strong><i class="bi bi-clock"></i> {{ lesson.quiz.time_limit_minutes }} minutes</strong>
+                            <strong><i class="bi bi-clock"></i> {{ lesson.quiz.time_limit_minutes }} min</strong>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <small class="text-muted d-block">Passing Score</small>
                             <strong><i class="bi bi-check-circle"></i> {{ lesson.quiz.passing_score }}%</strong>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <small class="text-muted d-block">Questions</small>
                             <strong><i class="bi bi-list-ol"></i> {{ lesson.quiz.get_total_questions }}</strong>
                         </div>
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Total Points</small>
+                            <strong><i class="bi bi-star-fill text-warning"></i> {{ lesson.quiz.get_total_points }}</strong>
+                        </div>
                     </div>
+                    {% if quiz_attempt %}
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle"></i> <strong>Already Completed</strong><br>
+                        Your Score: <strong>{{ quiz_attempt.score|floatformat:1 }}%</strong> | 
+                        Points Earned: <strong>{{ quiz_attempt.points_earned }}</strong> | 
+                        Status: {% if quiz_attempt.is_passed %}<span class="badge bg-success">Passed</span>{% else %}<span class="badge bg-danger">Failed</span>{% endif %}
+                    </div>
+                    <a href="{% url 'courses:quiz_result' quiz_attempt.id %}" class="btn btn-outline-warning btn-lg">
+                        <i class="bi bi-eye"></i> View Results
+                    </a>
+                    {% else %}
                     <a href="{% url 'courses:quiz_take' lesson.quiz.id %}" class="btn btn-warning btn-lg">
                         <i class="bi bi-play-circle"></i> Take Quiz
                     </a>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -159,18 +176,57 @@
                 <div class="card-body">
                     <p class="lead">{{ assignment.description }}</p>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">Due Date</small>
-                            <strong><i class="bi bi-calendar"></i> {{ assignment.due_date|date:"F d, Y h:i A" }}</strong>
+                            <strong><i class="bi bi-calendar"></i> {{ assignment.due_date|date:"M d, Y h:i A" }}</strong>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">Max Points</small>
-                            <strong><i class="bi bi-star"></i> {{ assignment.max_points }} points</strong>
+                            <strong><i class="bi bi-star-fill text-warning"></i> {{ assignment.max_points }} points</strong>
                         </div>
+                        {% if assignment_submissions|get_item:assignment.id %}
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Your Grade</small>
+                            {% with submission=assignment_submissions|get_item:assignment.id %}
+                            {% if submission.grade %}
+                            <strong class="text-success">{{ submission.grade }}%</strong>
+                            {% else %}
+                            <strong class="text-muted">Pending Review</strong>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                        {% endif %}
                     </div>
+                    
+                    {% if assignment.attachment %}
+                    <div class="mb-3">
+                        <a href="{{ assignment.attachment.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-download"></i> Download Instructions
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if assignment_submissions|get_item:assignment.id %}
+                    {% with submission=assignment_submissions|get_item:assignment.id %}
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-check-circle"></i> <strong>Already Submitted</strong><br>
+                        Submitted on: {{ submission.submitted_at|date:"M d, Y h:i A" }}<br>
+                        Status: 
+                        {% if submission.status == 'PENDING' %}<span class="badge bg-warning text-dark">Pending Review</span>
+                        {% elif submission.status == 'GRADED' %}<span class="badge bg-success">Graded - {{ submission.grade }}%</span>
+                        {% elif submission.status == 'RETURNED' %}<span class="badge bg-info">Returned</span>
+                        {% endif %}
+                        {% if submission.feedback %}<br>Feedback: <em>{{ submission.feedback }}</em>{% endif %}
+                    </div>
+                    <button class="btn btn-secondary btn-lg" disabled>
+                        <i class="bi bi-check-circle-fill"></i> Submitted
+                    </button>
+                    {% endwith %}
+                    {% else %}
                     <a href="{% url 'courses:assignment_submit' assignment.id %}" class="btn btn-info btn-lg">
                         <i class="bi bi-upload"></i> Submit Assignment
                     </a>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

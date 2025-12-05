@@ -68,10 +68,10 @@
                                 <small class="text-muted">
                                     <i class="bi bi-clock"></i> {{ lesson.duration_minutes }} minutes
                                     {% if lesson.quiz %}
-                                    | <i class="bi bi-puzzle text-warning"></i> Quiz
+                                    | <i class="bi bi-puzzle text-warning"></i> Quiz ({{ lesson.quiz.get_total_points }} pts)
                                     {% endif %}
                                     {% if lesson.assignments.count %}
-                                    | <i class="bi bi-file-earmark-text text-info"></i> Assignment
+                                    | <i class="bi bi-file-earmark-text text-info"></i> {{ lesson.assignments.count }} Assignment{{ lesson.assignments.count|pluralize }}
                                     {% endif %}
                                 </small>
                             </div>

@@ -195,15 +195,37 @@ def lesson_view(request, pk):
             enrollment=enrollment,
             lesson=lesson
         )
+
+        # Check if student has attempted quiz
+        quiz_attempt = None
+        if lesson.quiz:
+            quiz_attempt = QuizAttempt.objects.filter(
+                student=request.user,
+                quiz=lesson.quiz
+            ).first()
+
+        # Get assignment submissions
+        assignment_submissions = {}
+        for assignment in lesson.assignments.all():
+            submission = AssignmentSubmission.objects.filter(
+                student=request.user,
+                assignment=assignment
+            ).first()
+            if submission:
+                assignment_submissions[assignment.id] = submission
     else:
         enrollment = None
         progress = None
+        quiz_attempt = None
+        assignment_submissions = {}
 
     context = {
         'lesson': lesson,
         'course': lesson.course,
         'enrollment': enrollment,
         'progress': progress,
+        'quiz_attempt': quiz_attempt,
+        'assignment_submissions': assignment_submissions,
     }
     return render(request, 'courses/lesson_view.html', context)
 
@@ -254,6 +276,18 @@ def complete_lesson(request, pk):
 def quiz_take(request, pk):
     """Take a quiz"""
     quiz = get_object_or_404(Quiz, pk=pk)
+
+    # Check if student has already attempted this quiz
+    existing_attempt = QuizAttempt.objects.filter(
+        student=request.user,
+        quiz=quiz
+    ).first()
+
+    if existing_attempt:
+        messages.warning(
+            request, 'You have already taken this quiz. You can only take it once.')
+        return redirect('courses:quiz_result', pk=existing_attempt.id)
+
     questions = quiz.questions.prefetch_related('answers').all()
 
     if request.method == 'POST':
@@ -331,26 +365,19 @@ def assignment_submit(request, pk):
         assignment=assignment
     ).first()
 
+    if existing_submission:
+        messages.warning(
+            request, 'You have already submitted this assignment. You can only submit once.')
+        return redirect('courses:lesson_view', pk=assignment.lesson.id)
+
     if request.method == 'POST':
         form = AssignmentSubmissionForm(request.POST, request.FILES)
         if form.is_valid():
             submission = form.save(commit=False)
             submission.student = request.user
             submission.assignment = assignment
-
-            if existing_submission:
-                # Update existing submission
-                existing_submission.submission_file = submission.submission_file
-                existing_submission.submission_text = submission.submission_text
-                existing_submission.submitted_at = timezone.now()
-                existing_submission.status = 'PENDING'
-                existing_submission.save()
-                messages.success(
-                    request, 'Assignment resubmitted successfully!')
-            else:
-                submission.save()
-                messages.success(request, 'Assignment submitted successfully!')
-
+            submission.save()
+            messages.success(request, 'Assignment submitted successfully!')
             return redirect('courses:lesson_view', pk=assignment.lesson.id)
     else:
         form = AssignmentSubmissionForm()
@@ -358,7 +385,6 @@ def assignment_submit(request, pk):
     context = {
         'assignment': assignment,
         'form': form,
-        'existing_submission': existing_submission,
     }
     return render(request, 'courses/assignment_submit.html', context)
 
