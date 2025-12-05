@@ -198,7 +198,7 @@ def lesson_view(request, pk):
 
         # Check if student has attempted quiz
         quiz_attempt = None
-        if lesson.quiz:
+        if hasattr(lesson, 'quiz'):
             quiz_attempt = QuizAttempt.objects.filter(
                 student=request.user,
                 quiz=lesson.quiz
