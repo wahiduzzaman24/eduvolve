@@ -294,42 +294,81 @@
 </div>
 
 <script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 document.getElementById('markCompleteBtn')?.addEventListener('click', async function() {
     const btn = this;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Completing...';
     
+    const csrftoken = getCookie('csrftoken');
+    
     try {
         const response = await fetch('{% url "courses:complete_lesson" lesson.id %}', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': csrftoken,
                 'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'same-origin'
         });
         
+        // Parse JSON regardless of status code
         const data = await response.json();
         
-        if (data.success) {
+        // Check if the response was successful
+        if (response.ok && data.success) {
             btn.outerHTML = '<span class="badge bg-success fs-6 py-2 px-3"><i class="bi bi-check-circle-fill"></i> Completed</span>';
             
             // Show success message
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success alert-dismissible fade show';
-            alert.innerHTML = `
-                <i class="bi bi-trophy-fill"></i> <strong>${data.message}</strong> You earned ${data.points_earned} points!
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="bi bi-trophy-fill"></i> <strong>${data.message}</strong> ${data.points_earned ? ' You earned ' + data.points_earned + ' points!' : ''}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
-            document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
             
             // Reload after 2 seconds to update progress
             setTimeout(() => location.reload(), 2000);
+        } else {
+            // Re-enable button and show error alert
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Mark as Complete';
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+            errorDiv.innerHTML = `
+                <i class="bi bi-exclamation-triangle-fill"></i> <strong>Error:</strong> ${data.error || 'An error occurred. Please try again.'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.row'));
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error completing lesson:', error);
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-check-circle"></i> Mark as Complete';
-        alert('An error occurred. Please try again.');
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+        errorDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill"></i> <strong>Error:</strong> An error occurred. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.row'));
     }
 });
 </script>
